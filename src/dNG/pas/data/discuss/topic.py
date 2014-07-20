@@ -35,7 +35,7 @@ from time import time
 
 from dNG.pas.data.binary import Binary
 from dNG.pas.data.data_linker import DataLinker
-from dNG.pas.data.ownable_mixin import OwnableMixin
+from dNG.pas.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
 from dNG.pas.data.subscribable_mixin import SubscribableMixin
 from dNG.pas.database.sort_definition import SortDefinition
 from dNG.pas.database.instances.data_linker import DataLinker as _DbDataLinker
@@ -43,12 +43,10 @@ from dNG.pas.database.instances.discuss_post import DiscussPost as _DbDiscussPos
 from dNG.pas.database.instances.discuss_topic import DiscussTopic as _DbDiscussTopic
 from .list import List
 
-class Topic(DataLinker, OwnableMixin, SubscribableMixin):
+class Topic(DataLinker, OwnableLockableWriteMixin, SubscribableMixin):
 #
 	"""
 "Topic" represents a discussion topic.
-
-TODO: Handle "locked" in is_readable, is_*, ...
 
 :author:     direct Netware Group
 :copyright:  direct Netware Group - All rights reserved
@@ -70,7 +68,7 @@ Constructor __init__(Topic)
 		"""
 
 		DataLinker.__init__(self, db_instance)
-		OwnableMixin.__init__(self)
+		OwnableLockableWriteMixin.__init__(self)
 		SubscribableMixin.__init__(self)
 	#
 
@@ -225,7 +223,7 @@ Insert the instance into the database.
 				if (self.local.db_instance.user_permission == None): self.local.db_instance.user_permission = parent_data['user_permission']
 			#
 
-			# TODO: if (acl_missing and isinstance(parent_object, OwnableMixin)): self.data.acl_set_list(parent_object.data_acl_get_list())
+			# TODO: if (acl_missing and isinstance(parent_object, OwnableLockableWriteMixin)): self.data.acl_set_list(parent_object.data_acl_get_list())
 		#
 	#
 

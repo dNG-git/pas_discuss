@@ -35,13 +35,13 @@ from time import time
 
 from dNG.pas.data.binary import Binary
 from dNG.pas.data.data_linker import DataLinker
-from dNG.pas.data.ownable_mixin import OwnableMixin
+from dNG.pas.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
 from dNG.pas.data.subscribable_mixin import SubscribableMixin
 from dNG.pas.database.connection import Connection
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
 from dNG.pas.database.instances.discuss_list import DiscussList as _DbDiscussList
 
-class List(DataLinker, OwnableMixin, SubscribableMixin):
+class List(DataLinker, OwnableLockableWriteMixin, SubscribableMixin):
 #
 	"""
 "List" represents a discussion list.
@@ -60,15 +60,13 @@ class List(DataLinker, OwnableMixin, SubscribableMixin):
 		"""
 Constructor __init__(List)
 
-TODO: Handle "locked" in is_readable, is_*, ...
-
 :param db_instance: Encapsulated SQLAlchemy database instance
 
 :since: v0.1.00
 		"""
 
 		DataLinker.__init__(self, db_instance)
-		OwnableMixin.__init__(self)
+		OwnableLockableWriteMixin.__init__(self)
 		SubscribableMixin.__init__(self)
 
 		self.total_posts = None
@@ -125,7 +123,7 @@ Returns the number of posts of this and all subjacent lists.
 			#
 				is_readable = True
 
-				if (isinstance(entry, OwnableMixin)):
+				if (isinstance(entry, OwnableLockableWriteMixin)):
 				#
 					entry.set_permission_user_id(permission_user_id)
 					is_readable = entry.is_readable()
@@ -476,6 +474,30 @@ Load List instance by its subscription ID.
 		with Connection.get_instance() as database: db_instance = database.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id).first()
 		if (db_instance == None): raise NothingMatchedException("Profile ID '{0}' is invalid".format(_id))
 		return List(db_instance)
+	#
+
+	@staticmethod
+	def load_id_subscription_list(_id, offset = 0, limit = -1):
+	#
+		"""
+Load a list of matching List instances for the given subscription ID.
+
+:param _id: Subscription ID
+:param offset: SQLAlchemy query offset
+:param limit: SQLAlchemy query limit
+
+:return: (list) List of List instances on success
+:since:  v0.1.00
+		"""
+
+		with Connection.get_instance() as database:
+		#
+			db_query = database.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id)
+			if (offset > 0): db_query = db_query.offset(offset)
+			if (limit > 0): db_query = db_query.limit(limit)
+
+			return List.buffered_iterator(_DbDiscussList, database.execute(db_query), List)
+		#
 	#
 #
 

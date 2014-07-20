@@ -35,18 +35,16 @@ from time import time
 
 from dNG.pas.data.binary import Binary
 from dNG.pas.data.data_linker import DataLinker
-from dNG.pas.data.ownable_mixin import OwnableMixin
+from dNG.pas.data.ownable_lockable_read_mixin import OwnableLockableReadMixin
 from dNG.pas.database.instances.discuss_post import DiscussPost as _DbDiscussPost
 from dNG.pas.database.instances.text_entry import TextEntry as _DbTextEntry
 from .list import List
 from .topic import Topic
 
-class Post(DataLinker, OwnableMixin):
+class Post(DataLinker, OwnableLockableReadMixin):
 #
 	"""
 "Post" represents a single discussion post.
-
-TODO: Handle "locked" in is_readable, is_*, ...
 
 :author:     direct Netware Group
 :copyright:  direct Netware Group - All rights reserved
@@ -68,7 +66,7 @@ Constructor __init__(Post)
 		"""
 
 		DataLinker.__init__(self, db_instance)
-		OwnableMixin.__init__(self)
+		OwnableLockableReadMixin.__init__(self)
 	#
 
 	def delete(self):
@@ -157,7 +155,7 @@ Insert the instance into the database.
 				if (self.local.db_instance.user_permission == None): self.local.db_instance.user_permission = parent_data['user_permission']
 			#
 
-			# TODO: if (acl_missing and isinstance(parent_object, OwnableMixin)): self.data.acl_set_list(parent_object.data_acl_get_list())
+			# TODO: if (acl_missing and isinstance(parent_object, OwnableLockableReadMixin)): self.data.acl_set_list(parent_object.data_acl_get_list())
 		#
 	#
 
