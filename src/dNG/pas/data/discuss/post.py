@@ -36,12 +36,13 @@ from time import time
 from dNG.pas.data.binary import Binary
 from dNG.pas.data.data_linker import DataLinker
 from dNG.pas.data.ownable_lockable_read_mixin import OwnableLockableReadMixin
+from dNG.pas.database.lockable_mixin import LockableMixin
 from dNG.pas.database.instances.discuss_post import DiscussPost as _DbDiscussPost
 from dNG.pas.database.instances.text_entry import TextEntry as _DbTextEntry
 from .list import List
 from .topic import Topic
 
-class Post(DataLinker, OwnableLockableReadMixin):
+class Post(DataLinker, LockableMixin, OwnableLockableReadMixin):
 #
 	"""
 "Post" represents a single discussion post.
@@ -66,6 +67,7 @@ Constructor __init__(Post)
 		"""
 
 		DataLinker.__init__(self, db_instance)
+		LockableMixin.__init__(self)
 		OwnableLockableReadMixin.__init__(self)
 	#
 

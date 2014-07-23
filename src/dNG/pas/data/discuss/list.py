@@ -38,10 +38,11 @@ from dNG.pas.data.data_linker import DataLinker
 from dNG.pas.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
 from dNG.pas.data.subscribable_mixin import SubscribableMixin
 from dNG.pas.database.connection import Connection
+from dNG.pas.database.lockable_mixin import LockableMixin
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
 from dNG.pas.database.instances.discuss_list import DiscussList as _DbDiscussList
 
-class List(DataLinker, OwnableLockableWriteMixin, SubscribableMixin):
+class List(DataLinker, LockableMixin, OwnableLockableWriteMixin, SubscribableMixin):
 #
 	"""
 "List" represents a discussion list.
@@ -66,6 +67,7 @@ Constructor __init__(List)
 		"""
 
 		DataLinker.__init__(self, db_instance)
+		LockableMixin.__init__(self)
 		OwnableLockableWriteMixin.__init__(self)
 		SubscribableMixin.__init__(self)
 

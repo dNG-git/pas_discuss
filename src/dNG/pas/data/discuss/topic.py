@@ -37,13 +37,14 @@ from dNG.pas.data.binary import Binary
 from dNG.pas.data.data_linker import DataLinker
 from dNG.pas.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
 from dNG.pas.data.subscribable_mixin import SubscribableMixin
+from dNG.pas.database.lockable_mixin import LockableMixin
 from dNG.pas.database.sort_definition import SortDefinition
 from dNG.pas.database.instances.data_linker import DataLinker as _DbDataLinker
 from dNG.pas.database.instances.discuss_post import DiscussPost as _DbDiscussPost
 from dNG.pas.database.instances.discuss_topic import DiscussTopic as _DbDiscussTopic
 from .list import List
 
-class Topic(DataLinker, OwnableLockableWriteMixin, SubscribableMixin):
+class Topic(DataLinker, LockableMixin, OwnableLockableWriteMixin, SubscribableMixin):
 #
 	"""
 "Topic" represents a discussion topic.
@@ -68,6 +69,7 @@ Constructor __init__(Topic)
 		"""
 
 		DataLinker.__init__(self, db_instance)
+		LockableMixin.__init__(self)
 		OwnableLockableWriteMixin.__init__(self)
 		SubscribableMixin.__init__(self)
 	#
