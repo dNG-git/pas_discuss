@@ -76,38 +76,18 @@ Constructor __init__(Post)
 		"""
 Deletes this entry from the database.
 
-:return: (bool) True on success
-:since:  v0.1.00
+:since: v0.1.00
 		"""
 
 		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.delete()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
 
-		_return = False
-
 		with self:
 		#
-			self._database.begin()
+			db_text_entry_instance = self.local.db_instance.rel_text_entry
 
-			try:
-			#
-				db_text_entry_instance = self.local.db_instance.rel_text_entry
-				_return = DataLinker.delete(self)
-
-				if (_return
-				    and db_text_entry_instance != None
-				   ): self._database.delete(db_text_entry_instance)
-
-				if (_return): self._database.commit()
-				else: self._database.rollback()
-			#
-			except Exception:
-			#
-				self._database.rollback()
-				raise
-			#
+			DataLinker.delete(self)
+			if (db_text_entry_instance != None): self._database.delete(db_text_entry_instance)
 		#
-
-		return _return
 	#
 
 	def _get_unknown_data_attribute(self, attribute):
