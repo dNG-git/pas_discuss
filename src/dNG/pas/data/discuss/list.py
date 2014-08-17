@@ -473,7 +473,7 @@ Load List instance by its subscription ID.
 :since:  v0.1.00
 		"""
 
-		with Connection.get_instance() as database: db_instance = database.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id).first()
+		with Connection.get_instance() as connection: db_instance = connection.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id).first()
 		if (db_instance == None): raise NothingMatchedException("Profile ID '{0}' is invalid".format(_id))
 		return List(db_instance)
 	#
@@ -492,13 +492,13 @@ Load a list of matching List instances for the given subscription ID.
 :since:  v0.1.00
 		"""
 
-		with Connection.get_instance() as database:
+		with Connection.get_instance() as connection:
 		#
-			db_query = database.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id)
+			db_query = connection.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id)
 			if (offset > 0): db_query = db_query.offset(offset)
 			if (limit > 0): db_query = db_query.limit(limit)
 
-			return List.buffered_iterator(_DbDiscussList, database.execute(db_query), List)
+			return List.buffered_iterator(_DbDiscussList, connection.execute(db_query), List)
 		#
 	#
 #

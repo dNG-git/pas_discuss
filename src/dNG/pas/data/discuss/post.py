@@ -71,6 +71,33 @@ Constructor __init__(Post)
 		OwnableLockableReadMixin.__init__(self)
 	#
 
+	def add_reply_post(self, post):
+	#
+		"""
+Add the given child post.
+
+:param post: DiscussPost instance
+:param post_preview: Post preview
+
+:since: v0.1.00
+		"""
+
+		# pylint: disable=protected-access
+
+		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.add_reply_post()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+
+		if (isinstance(post, Post)):
+		#
+			with self:
+			#
+				if (post.get_id() != self.local.db_instance.id):
+				#
+					self.local.db_instance.rel_children.append(post._get_db_instance())
+				#
+			#
+		#
+	#
+
 	def delete(self):
 	#
 		"""
@@ -86,8 +113,64 @@ Deletes this entry from the database.
 			db_text_entry_instance = self.local.db_instance.rel_text_entry
 
 			DataLinker.delete(self)
-			if (db_text_entry_instance != None): self._database.delete(db_text_entry_instance)
+			if (db_text_entry_instance != None): self.local.connection.delete(db_text_entry_instance)
 		#
+	#
+
+	def get_sub_entries(self, offset = 0, limit = -1):
+	#
+		"""
+Returns the child entries of this instance.
+
+:param offset: SQLAlchemy query offset
+:param limit: SQLAlchemy query limit
+
+:return: (list) DataLinker children instances
+:since:  v0.1.00
+		"""
+
+		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_sub_entries({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
+		return DataLinker.get_sub_entries(self, offset, limit, exclude_identity = "DiscussPost")
+	#
+
+	def get_sub_entries_count(self):
+	#
+		"""
+Returns the number of child entries of this instance.
+
+:return: (int) Number of child entries
+:since:  v0.1.00
+		"""
+
+		return DataLinker.get_sub_entries_count(self, exclude_identity = "DiscussPost")
+	#
+
+	def get_reply_posts(self, offset = 0, limit = -1):
+	#
+		"""
+Returns the children reply posts of this instance.
+
+:param offset: SQLAlchemy query offset
+:param limit: SQLAlchemy query limit
+
+:return: (list) Post children instances
+:since:  v0.1.00
+		"""
+
+		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_reply_posts({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
+		return DataLinker.get_sub_entries(self, offset, limit, identity = "DiscussPost")
+	#
+
+	def get_reply_posts_count(self):
+	#
+		"""
+Returns the number of reply posts of this instance.
+
+:return: (int) Number of child posts
+:since:  v0.1.00
+		"""
+
+		return DataLinker.get_sub_entries_count(self, identity = "DiscussPost")
 	#
 
 	def _get_unknown_data_attribute(self, attribute):
@@ -117,7 +200,7 @@ Insert the instance into the database.
 
 		DataLinker._insert(self)
 
-		with self, self._database.no_autoflush:
+		with self.local.connection.no_autoflush:
 		#
 			if (self.local.db_instance.time_published == None): self.local.db_instance.time_published = int(time())
 
@@ -151,7 +234,7 @@ Sets values given as keyword arguments to this method.
 
 		self._ensure_thread_local_instance(_DbDiscussPost)
 
-		with self, self._database.no_autoflush:
+		with self, self.local.connection.no_autoflush:
 		#
 			DataLinker.set_data_attributes(self, **kwargs)
 

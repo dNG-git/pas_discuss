@@ -116,13 +116,15 @@ Returns the default sort definition list.
 
 :param context: Sort definition context
 
-:return: (list) Sort definition list
+:return: (object) Sort definition
 :since:  v0.1.00
 		"""
 
 		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._get_default_sort_definition({1})- (#echo(__LINE__)#)", self, context, context = "pas_datalinker")
 
-		return ([ ( "position", SortDefinition.ASCENDING ), ( "time_sortable", SortDefinition.ASCENDING ) ]
+		return (SortDefinition([ ( "position", SortDefinition.ASCENDING ),
+		                         ( "time_sortable", SortDefinition.ASCENDING )
+		                       ])
 		        if (context == "DiscussPost") else
 		        DataLinker._get_default_sort_definition(self, context)
 		       )
@@ -144,7 +146,7 @@ Returns the children posts of this instance.
 
 		with self:
 		#
-			db_query = self._database.query(_DbDataLinker)
+			db_query = self.local.connection.query(_DbDataLinker)
 
 			db_query = db_query.filter(_DbDiscussTopic.id_main == self.local.db_instance.id,
 			                           _DbDiscussTopic.identity == "DiscussPost"
@@ -157,7 +159,7 @@ Returns the children posts of this instance.
 			if (offset > 0): db_query = db_query.offset(offset)
 			if (limit > 0): db_query = db_query.limit(limit)
 
-			return List.buffered_iterator(_DbDiscussPost, self._database.execute(db_query), DataLinker)
+			return List.buffered_iterator(_DbDiscussPost, self.local.connection.execute(db_query), DataLinker)
 		#
 	#
 
@@ -207,7 +209,7 @@ Insert the instance into the database.
 
 		DataLinker._insert(self)
 
-		with self, self._database.no_autoflush:
+		with self.local.connection.no_autoflush:
 		#
 			if (self.local.db_instance.time_published == None): self.local.db_instance.time_published = int(time())
 
