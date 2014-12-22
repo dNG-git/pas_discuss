@@ -87,7 +87,7 @@ Add the given child post.
 
 		# pylint: disable=protected-access
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.add_post()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.add_post()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
 
 		if (isinstance(post, DataLinker) and post.get_identity() == "DiscussPost"):
 		#
@@ -120,7 +120,7 @@ Returns the default sort definition list.
 :since:  v0.1.00
 		"""
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._get_default_sort_definition({1})- (#echo(__LINE__)#)", self, context, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._get_default_sort_definition({1})- (#echo(__LINE__)#)", self, context, context = "pas_datalinker")
 
 		return (SortDefinition([ ( "position", SortDefinition.ASCENDING ),
 		                         ( "time_sortable", SortDefinition.ASCENDING )
@@ -142,7 +142,7 @@ Returns the children posts of this instance.
 :since:  v0.1.00
 		"""
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_posts({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_posts({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
 
 		with self:
 		#
@@ -159,7 +159,7 @@ Returns the children posts of this instance.
 			if (offset > 0): db_query = db_query.offset(offset)
 			if (limit > 0): db_query = db_query.limit(limit)
 
-			return List.buffered_iterator(_DbDiscussPost, self.local.connection.execute(db_query), DataLinker)
+			return List.buffered_iterator(_DbDiscussPost, self.local.connection.execute(db_query))
 		#
 	#
 
@@ -183,7 +183,7 @@ Returns the child entries of this instance.
 :since:  v0.1.00
 		"""
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_sub_entries({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_sub_entries({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
 		return DataLinker.get_sub_entries(self, offset, limit, exclude_identity = "DiscussPost")
 	#
 
@@ -211,7 +211,7 @@ Insert the instance into the database.
 
 		with self.local.connection.no_autoflush:
 		#
-			if (self.local.db_instance.time_published == None): self.local.db_instance.time_published = int(time())
+			if (self.local.db_instance.time_published is None): self.local.db_instance.time_published = int(time())
 
 			data_missing = (self.is_data_attribute_none("owner_type", "guest_permission", "user_permission"))
 			acl_missing = (len(self.local.db_instance.rel_acl) == 0)
@@ -221,10 +221,10 @@ Insert the instance into the database.
 			#
 				parent_data = parent_object.get_data_attributes("id_site", "owner_type", "guest_permission", "user_permission")
 
-				if (self.local.db_instance.id_site == None and parent_data['id_site'] != None): self.local.db_instance.id_site = parent_data['id_site']
-				if (self.local.db_instance.owner_type == None): self.local.db_instance.owner_type = parent_data['owner_type']
-				if (self.local.db_instance.guest_permission == None): self.local.db_instance.guest_permission = parent_data['guest_permission']
-				if (self.local.db_instance.user_permission == None): self.local.db_instance.user_permission = parent_data['user_permission']
+				if (self.local.db_instance.id_site is None and parent_data['id_site'] is not None): self.local.db_instance.id_site = parent_data['id_site']
+				if (self.local.db_instance.owner_type is None): self.local.db_instance.owner_type = parent_data['owner_type']
+				if (self.local.db_instance.guest_permission is None): self.local.db_instance.guest_permission = parent_data['guest_permission']
+				if (self.local.db_instance.user_permission is None): self.local.db_instance.user_permission = parent_data['user_permission']
 			#
 
 			# TODO: if (acl_missing and isinstance(parent_object, OwnableLockableWriteMixin)): self.data.acl_set_list(parent_object.data_acl_get_list())

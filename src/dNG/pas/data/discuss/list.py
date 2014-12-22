@@ -108,11 +108,11 @@ Returns the number of posts of this and all subjacent lists.
 :since: v0.1.00
 		"""
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._analyze_structure()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._analyze_structure()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
 
 		with self:
 		#
-			if (cache_id == None): cache_id = "DiscussList:{0}".format(self.local.db_instance.id_main)
+			if (cache_id is None): cache_id = "DiscussList:{0}".format(self.local.db_instance.id_main)
 			permission_user_id = self.get_permission_user_id()
 
 			DataLinker._analyze_structure(self, cache_id)
@@ -138,7 +138,7 @@ Returns the number of posts of this and all subjacent lists.
 					self.total_topics += entry_data['topics']
 					self.total_posts += entry_data['posts']
 
-					if (entry_data['last_id_topic'] != None and entry_data['time_sortable'] > self.latest_timestamp):
+					if (entry_data['last_id_topic'] is not None and entry_data['time_sortable'] > self.latest_timestamp):
 					#
 						self.latest_timestamp = entry_data['time_sortable']
 						self.latest_topic_id = entry_data['last_id_topic']
@@ -164,7 +164,7 @@ Add the given post.
 
 		# pylint: disable=protected-access
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.add_post()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.add_post()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
 
 		if (isinstance(post, DataLinker) and post.get_identity() == "DiscussPost"):
 		#
@@ -204,7 +204,7 @@ Add the given topic.
 
 		# pylint: disable=protected-access
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.add_topic()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.add_topic()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
 
 		if (isinstance(topic, DataLinker) and topic.get_identity() == "DiscussTopic"):
 		#
@@ -258,7 +258,7 @@ Returns the timestamp of the newest post of this or an subjacent list.
 :since:  v0.1.00
 		"""
 
-		if (self.latest_timestamp == None): self._analyze_structure()
+		if (self.latest_timestamp is None): self._analyze_structure()
 		return self.latest_timestamp
 	#
 
@@ -271,7 +271,7 @@ Returns the topic ID of the newest post of this or an subjacent list.
 :since:  v0.1.00
 		"""
 
-		if (self.latest_timestamp == None): self._analyze_structure()
+		if (self.latest_timestamp is None): self._analyze_structure()
 		return self.latest_topic_id
 	#
 
@@ -284,7 +284,7 @@ Returns the author ID of the newest post of this or an subjacent list.
 :since:  v0.1.00
 		"""
 
-		if (self.latest_timestamp == None): self._analyze_structure()
+		if (self.latest_timestamp is None): self._analyze_structure()
 		return self.latest_author_id
 	#
 
@@ -297,7 +297,7 @@ Returns the preview of the newest post of this or an subjacent list.
 :since:  v0.1.00
 		"""
 
-		if (self.latest_timestamp == None): self._analyze_structure()
+		if (self.latest_timestamp is None): self._analyze_structure()
 		return self.latest_preview
 	#
 
@@ -313,7 +313,7 @@ Returns the child entries of this instance.
 :since:  v0.1.00
 		"""
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_sub_entries({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_sub_entries({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
 		return DataLinker.get_sub_entries(self, offset, limit, exclude_identity = "DiscussTopic")
 	#
 
@@ -341,7 +341,7 @@ Returns the children topics of this instance.
 :since:  v0.1.00
 		"""
 
-		if (self.log_handler != None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_topics({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}.get_topics({1:d}, {2:d})- (#echo(__LINE__)#)", self, offset, limit, context = "pas_datalinker")
 		return DataLinker.get_sub_entries(self, offset, limit, identity = "DiscussTopic")
 	#
 
@@ -362,7 +362,7 @@ Returns the number of posts of this and all subjacent lists.
 :since:  v0.1.00
 		"""
 
-		if (self.total_posts == None): self._analyze_structure()
+		if (self.total_posts is None): self._analyze_structure()
 		return self.total_posts
 	#
 
@@ -375,7 +375,7 @@ Returns the number of topics of this and all subjacent lists.
 :since:  v0.1.00
 		"""
 
-		if (self.total_topics == None): self._analyze_structure()
+		if (self.total_topics is None): self._analyze_structure()
 		return self.total_topics
 	#
 
@@ -473,8 +473,10 @@ Load List instance by its subscription ID.
 :since:  v0.1.00
 		"""
 
+		if (_id is None): raise NothingMatchedException("List subscription ID is invalid")
+
 		with Connection.get_instance() as connection: db_instance = connection.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id).first()
-		if (db_instance == None): raise NothingMatchedException("Profile ID '{0}' is invalid".format(_id))
+		if (db_instance is None): raise NothingMatchedException("List subscription '{0}' is invalid".format(_id))
 		return List(db_instance)
 	#
 
@@ -492,13 +494,15 @@ Load a list of matching List instances for the given subscription ID.
 :since:  v0.1.00
 		"""
 
+		# TODO: load_list_... datalinker
+
 		with Connection.get_instance() as connection:
 		#
 			db_query = connection.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id)
 			if (offset > 0): db_query = db_query.offset(offset)
 			if (limit > 0): db_query = db_query.limit(limit)
 
-			return List.buffered_iterator(_DbDiscussList, connection.execute(db_query), List)
+			return List.buffered_iterator(_DbDiscussList, connection.execute(db_query))
 		#
 	#
 #

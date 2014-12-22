@@ -133,8 +133,7 @@ Constructor __init__(DiscussTopic)
 		"""
 
 		DataLinker.__init__(self, *args, **kwargs)
-
-		if (self.posts == None): self.posts = 0
+		if (self.posts is None): self.posts = 0
 	#
 #
 
