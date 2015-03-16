@@ -109,6 +109,58 @@ Add the given child post.
 		#
 	#
 
+	def _apply_sub_entries_join_condition(self, db_query, context = None):
+	#
+		"""
+Returns the modified SQLAlchemy database query with the "join" condition
+applied.
+
+:param context: Sub entries request context
+
+:return: (object) SQLAlchemy database query
+:since:  v0.1.00
+		"""
+
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._apply_sub_entries_condition()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+
+		_return = DataLinker._apply_sub_entries_join_condition(self, db_query, context)
+
+		if (context == "DiscussPost"):
+		#
+			_return = _return.join(_DbDiscussPost,
+			                       _DbDataLinker.id == _DbDiscussPost.id
+			                      )
+		#
+
+		return _return
+	#
+
+	def _apply_sub_entries_order_by_condition(self, db_query, context = None):
+	#
+		"""
+Returns the modified SQLAlchemy database query with the "order by" condition
+applied.
+
+:param context: Sub entries request context
+
+:return: (object) SQLAlchemy database query
+:since:  v0.1.00
+		"""
+
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._apply_sub_entries_order_by_condition()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+
+		_return = db_query
+
+		if (context == "DiscussPost"):
+		#
+			sort_definition = self._get_db_sort_definition(context)
+			if (sort_definition is not None): _return = sort_definition.apply(_DbDiscussPost, db_query)
+		#
+		else: _return = DataLinker._apply_sub_entries_order_by_condition(self, db_query, context)
+
+		return _return
+	#
+
 	def _get_default_sort_definition(self, context = None):
 	#
 		"""

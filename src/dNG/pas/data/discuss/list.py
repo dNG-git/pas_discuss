@@ -40,7 +40,9 @@ from dNG.pas.data.subscribable_mixin import SubscribableMixin
 from dNG.pas.database.connection import Connection
 from dNG.pas.database.lockable_mixin import LockableMixin
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
+from dNG.pas.database.instances.data_linker import DataLinker as _DbDataLinker
 from dNG.pas.database.instances.discuss_list import DiscussList as _DbDiscussList
+from dNG.pas.database.instances.discuss_topic import DiscussTopic as _DbDiscussTopic
 
 class List(DataLinker, LockableMixin, OwnableLockableWriteMixin, SubscribableMixin):
 #
@@ -232,6 +234,58 @@ Add the given topic.
 		#
 	#
 
+	def _apply_sub_entries_join_condition(self, db_query, context = None):
+	#
+		"""
+Returns the modified SQLAlchemy database query with the "join" condition
+applied.
+
+:param context: Sub entries request context
+
+:return: (object) SQLAlchemy database query
+:since:  v0.1.00
+		"""
+
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._apply_sub_entries_condition()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+
+		_return = DataLinker._apply_sub_entries_join_condition(self, db_query, context)
+
+		if (context == "DiscussTopic"):
+		#
+			_return = _return.join(_DbDiscussTopic,
+			                       _DbDataLinker.id == _DbDiscussTopic.id
+			                      )
+		#
+
+		return _return
+	#
+
+	def _apply_sub_entries_order_by_condition(self, db_query, context = None):
+	#
+		"""
+Returns the modified SQLAlchemy database query with the "order by" condition
+applied.
+
+:param context: Sub entries request context
+
+:return: (object) SQLAlchemy database query
+:since:  v0.1.00
+		"""
+
+		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._apply_sub_entries_order_by_condition()- (#echo(__LINE__)#)", self, context = "pas_datalinker")
+
+		_return = db_query
+
+		if (context == "DiscussTopic"):
+		#
+			sort_definition = self._get_db_sort_definition(context)
+			if (sort_definition is not None): _return = sort_definition.apply(_DbDiscussTopic, db_query)
+		#
+		else: _return = DataLinker._apply_sub_entries_order_by_condition(self, db_query, context)
+
+		return _return
+	#
+
 	def _get_data_attribute(self, attribute):
 	#
 		"""
@@ -239,7 +293,7 @@ Returns the data for the requested attribute.
 
 :param attribute: Requested attribute
 
-:return: (dict) Value for the requested attribute; None if undefined
+:return: (mixed) Value for the requested attribute; None if undefined
 :since:  v0.1.00
 		"""
 
