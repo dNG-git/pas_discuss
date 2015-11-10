@@ -36,7 +36,9 @@ from time import time
 from dNG.pas.data.binary import Binary
 from dNG.pas.data.data_linker import DataLinker
 from dNG.pas.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
+from dNG.pas.data.ownable_mixin import OwnableMixin as OwnableInstance
 from dNG.pas.data.subscribable_mixin import SubscribableMixin
+from dNG.pas.database.condition_definition import ConditionDefinition
 from dNG.pas.database.connection import Connection
 from dNG.pas.database.lockable_mixin import LockableMixin
 from dNG.pas.database.nothing_matched_exception import NothingMatchedException
@@ -56,6 +58,11 @@ class List(DataLinker, LockableMixin, OwnableLockableWriteMixin, SubscribableMix
 :since:      v0.1.00
 :license:    https://www.direct-netware.de/redirect?licenses;gpl
              GNU General Public License 2
+	"""
+
+	_DB_INSTANCE_CLASS = _DbDiscussList
+	"""
+SQLAlchemy database instance class to initialize for new instances.
 	"""
 
 	def __init__(self, db_instance = None):
@@ -102,7 +109,9 @@ Preview of the newest post of this or an subjacent list
 	def _analyze_structure(self, cache_id = None):
 	#
 		"""
-Returns the number of posts of this and all subjacent lists.
+Analyzes the entry structure, the number of total topics, values and
+identifies the latest entry based on the main ID and list ID of this
+instance.
 
 :param cache_id: ID used for building the structure SQLAlchemy query and
                  cache its result.
@@ -127,7 +136,7 @@ Returns the number of posts of this and all subjacent lists.
 			#
 				is_readable = True
 
-				if (isinstance(entry, OwnableLockableWriteMixin)):
+				if (isinstance(entry, OwnableInstance)):
 				#
 					entry.set_permission_user_id(permission_user_id)
 					is_readable = entry.is_readable()
@@ -475,8 +484,6 @@ Sets values given as keyword arguments to this method.
 :since: v0.1.00
 		"""
 
-		self._ensure_thread_local_instance(_DbDiscussList)
-
 		with self:
 		#
 			DataLinker.set_data_attributes(self, **kwargs)
@@ -515,12 +522,13 @@ Sets values given as keyword arguments to this method.
 		#
 	#
 
-	@staticmethod
-	def load_id_subscription(_id):
+	@classmethod
+	def load_id_subscription(cls, _id):
 	#
 		"""
 Load List instance by its subscription ID.
 
+:param cls: Expected encapsulating database instance class
 :param _id: Subscription ID
 
 :return: (object) List instance on success
@@ -529,9 +537,15 @@ Load List instance by its subscription ID.
 
 		if (_id is None): raise NothingMatchedException("List subscription ID is invalid")
 
-		with Connection.get_instance() as connection: db_instance = connection.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id).first()
-		if (db_instance is None): raise NothingMatchedException("List subscription '{0}' is invalid".format(_id))
-		return List(db_instance)
+		with Connection.get_instance():
+		#
+			db_instance = DataLinker.get_db_class_query(cls).filter(_DbDiscussList.id_subscription == _id).first()
+
+			if (db_instance is None): raise NothingMatchedException("List subscription '{0}' is invalid".format(_id))
+			DataLinker._ensure_db_class(cls, db_instance)
+
+			return List(db_instance)
+		#
 	#
 
 	@staticmethod
@@ -548,16 +562,10 @@ Load a list of matching List instances for the given subscription ID.
 :since:  v0.1.00
 		"""
 
-		# TODO: load_list_... datalinker
+		condition_definition = ConditionDefinition()
+		condition_definition.add_exact_match_condition("id_subscription", _id)
 
-		with Connection.get_instance() as connection:
-		#
-			db_query = connection.query(_DbDiscussList).filter(_DbDiscussList.id_subscription == _id)
-			if (offset > 0): db_query = db_query.offset(offset)
-			if (limit > 0): db_query = db_query.limit(limit)
-
-			return List.buffered_iterator(_DbDiscussList, connection.execute(db_query))
-		#
+		return DataLinker._load_entries_list_with_condition(_DbDiscussList, condition_definition, offset, limit)
 	#
 #
 

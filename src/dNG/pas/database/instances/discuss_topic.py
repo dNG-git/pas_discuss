@@ -121,7 +121,7 @@ contentor_category.user_permission
 	__mapper_args__ = { "polymorphic_identity": "DiscussTopic" }
 	"""
 sqlalchemy.org: Other options are passed to mapper() using the
-                __mapper_args__ class variable.
+__mapper_args__ class variable.
 	"""
 
 	def __init__(self, *args, **kwargs):

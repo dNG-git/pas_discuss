@@ -58,6 +58,11 @@ class Topic(DataLinker, LockableMixin, OwnableLockableWriteMixin, SubscribableMi
              GNU General Public License 2
 	"""
 
+	_DB_INSTANCE_CLASS = _DbDiscussTopic
+	"""
+SQLAlchemy database instance class to initialize for new instances.
+	"""
+
 	def __init__(self, db_instance = None):
 	#
 		"""
@@ -290,8 +295,6 @@ Sets values given as keyword arguments to this method.
 
 :since: v0.1.00
 		"""
-
-		self._ensure_thread_local_instance(_DbDiscussTopic)
 
 		with self:
 		#
