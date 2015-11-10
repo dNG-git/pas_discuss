@@ -57,6 +57,11 @@ class Post(DataLinker, LockableMixin, OwnableLockableReadMixin):
              GNU General Public License 2
 	"""
 
+	_DB_INSTANCE_CLASS = _DbDiscussPost
+	"""
+SQLAlchemy database instance class to initialize for new instances.
+	"""
+
 	def __init__(self, db_instance = None):
 	#
 		"""
@@ -70,6 +75,10 @@ Constructor __init__(Post)
 		DataLinker.__init__(self, db_instance)
 		LockableMixin.__init__(self)
 		OwnableLockableReadMixin.__init__(self)
+
+		self.set_max_inherited_permissions(OwnableLockableReadMixin.READABLE,
+		                                   OwnableLockableReadMixin.READABLE
+		                                  )
 	#
 
 	def add_reply_post(self, post):
@@ -264,13 +273,12 @@ Insert the instance into the database.
 
 			if (data_missing and (is_parent_topic or isinstance(parent_object, List))):
 			#
-				parent_data = parent_object.get_data_attributes("id_site", "owner_type", "guest_permission", "user_permission")
+				parent_data = parent_object.get_data_attributes("id_site")
 
 				if (self.local.db_instance.id_site is None and parent_data['id_site'] is not None): self.local.db_instance.id_site = parent_data['id_site']
-				if (self.local.db_instance.owner_type is None): self.local.db_instance.owner_type = parent_data['owner_type']
 				if (is_parent_topic): self.local.db_instance.position = parent_object._get_db_instance().posts
-				if (self.local.db_instance.guest_permission is None): self.local.db_instance.guest_permission = parent_data['guest_permission']
-				if (self.local.db_instance.user_permission is None): self.local.db_instance.user_permission = parent_data['user_permission']
+
+				self._copy_default_permission_settings_from_instance(parent_object)
 			#
 
 			# TODO: if (acl_missing and isinstance(parent_object, OwnableLockableReadMixin)): self.data.acl_set_list(parent_object.data_acl_get_list())
@@ -284,8 +292,6 @@ Sets values given as keyword arguments to this method.
 
 :since: v0.1.00
 		"""
-
-		self._ensure_thread_local_instance(_DbDiscussPost)
 
 		with self, self.local.connection.no_autoflush:
 		#
@@ -327,7 +333,6 @@ Sets the post ID.
 
 		if (self.log_handler is not None): self.log_handler.debug("#echo(__FILEPATH__)# -{0!r}._set_id({1})- (#echo(__LINE__)#)", self, _id, context = "pas_datalinker")
 
-		self._ensure_thread_local_instance(_DbDiscussPost)
 		with self: self.local.db_instance.id = _id
 	#
 #
