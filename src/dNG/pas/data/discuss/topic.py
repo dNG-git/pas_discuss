@@ -216,7 +216,7 @@ Returns the children posts of this instance.
 			if (offset > 0): db_query = db_query.offset(offset)
 			if (limit > 0): db_query = db_query.limit(limit)
 
-			return List.buffered_iterator(_DbDiscussPost, self.local.connection.execute(db_query))
+			return List.iterator(_DbDiscussPost, self.local.connection.execute(db_query))
 		#
 	#
 
@@ -270,7 +270,7 @@ Insert the instance into the database.
 		#
 			if (self.local.db_instance.time_published is None): self.local.db_instance.time_published = int(time())
 
-			data_missing = (self.is_data_attribute_none("owner_type", "guest_permission", "user_permission"))
+			data_missing = self.is_data_attribute_none("owner_type", "guest_permission", "user_permission")
 			acl_missing = (len(self.local.db_instance.rel_acl) == 0)
 			parent_object = (self.load_parent() if (data_missing or acl_missing) else None)
 
