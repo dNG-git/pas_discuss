@@ -33,13 +33,15 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 from time import time
 
-from dNG.pas.data.binary import Binary
-from dNG.pas.data.data_linker import DataLinker
-from dNG.pas.data.ownable_lockable_read_mixin import OwnableLockableReadMixin
-from dNG.pas.database.lockable_mixin import LockableMixin
-from dNG.pas.database.instances.data_linker import DataLinker as _DbDataLinker
-from dNG.pas.database.instances.discuss_post import DiscussPost as _DbDiscussPost
-from dNG.pas.database.instances.text_entry import TextEntry as _DbTextEntry
+from dNG.data.binary import Binary
+from dNG.data.data_linker import DataLinker
+from dNG.data.ownable_mixin import OwnableMixin as OwnableInstance
+from dNG.data.ownable_lockable_read_mixin import OwnableLockableReadMixin
+from dNG.database.instances.data_linker import DataLinker as _DbDataLinker
+from dNG.database.instances.discuss_post import DiscussPost as _DbDiscussPost
+from dNG.database.instances.text_entry import TextEntry as _DbTextEntry
+from dNG.database.lockable_mixin import LockableMixin
+
 from .list import List
 from .topic import Topic
 
@@ -48,7 +50,7 @@ class Post(DataLinker, LockableMixin, OwnableLockableReadMixin):
 	"""
 "Post" represents a single discussion post.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: discuss
@@ -260,28 +262,32 @@ Insert the instance into the database.
 :since: v0.1.00
 		"""
 
-		DataLinker._insert(self)
-
 		with self.local.connection.no_autoflush:
 		#
+			DataLinker._insert(self)
+
 			if (self.local.db_instance.time_published is None): self.local.db_instance.time_published = int(time())
 
-			data_missing = self.is_data_attribute_none("owner_type", "guest_permission", "user_permission")
-			acl_missing = (len(self.local.db_instance.rel_acl) == 0)
-			parent_object = (self.load_main() if (data_missing or acl_missing) else None)
+			is_acl_missing = (len(self.local.db_instance.rel_acl) == 0)
+			is_data_missing = self.is_data_attribute_none("owner_type")
+			is_permission_missing = self.is_data_attribute_none("guest_permission", "user_permission")
+
+			parent_object = (self.load_parent() if (is_acl_missing or is_data_missing or is_permission_missing) else None)
 			is_parent_topic = isinstance(parent_object, Topic)
 
-			if (data_missing and (is_parent_topic or isinstance(parent_object, List))):
+			if (is_data_missing and (is_parent_topic or isinstance(parent_object, List))):
 			#
 				parent_data = parent_object.get_data_attributes("id_site")
 
 				if (self.local.db_instance.id_site is None and parent_data['id_site'] is not None): self.local.db_instance.id_site = parent_data['id_site']
 				if (is_parent_topic): self.local.db_instance.position = parent_object._get_db_instance().posts
-
-				self._copy_default_permission_settings_from_instance(parent_object)
 			#
 
-			# TODO: if (acl_missing and isinstance(parent_object, OwnableLockableReadMixin)): self.data.acl_set_list(parent_object.data_acl_get_list())
+			if (isinstance(parent_object, OwnableInstance)):
+			#
+				if (is_acl_missing): self._copy_acl_entries_from_instance(parent_object)
+				if (is_permission_missing): self._copy_default_permission_settings_from_instance(parent_object)
+			#
 		#
 	#
 

@@ -34,16 +34,16 @@ https://www.direct-netware.de/redirect?licenses;gpl
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import BIGINT, BOOLEAN, CHAR, VARCHAR
 
-from dNG.pas.database.types.date_time import DateTime
 from .data_linker import DataLinker
 from .ownable_mixin import OwnableMixin
 
-class DiscussTopic(DataLinker, OwnableMixin):
+class DiscussList(DataLinker, OwnableMixin):
 #
 	"""
-"DiscussTopic" represents a discussion topic.
+"DiscussList" represents a discussion list (possibly connected to a
+subscribable address).
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: discuss
@@ -52,11 +52,11 @@ class DiscussTopic(DataLinker, OwnableMixin):
              GNU General Public License 2
 	"""
 
-	__tablename__ = "{0}_discuss_topic".format(DataLinker.get_table_prefix())
+	__tablename__ = "{0}_discuss_list".format(DataLinker.get_table_prefix())
 	"""
 SQLAlchemy table name
 	"""
-	db_instance_class = "dNG.pas.data.discuss.Topic"
+	db_instance_class = "dNG.data.discuss.List"
 	"""
 Encapsulating SQLAlchemy database instance class name
 	"""
@@ -67,47 +67,47 @@ Database schema version
 
 	id = Column(VARCHAR(32), ForeignKey(DataLinker.id), primary_key = True)
 	"""
-discuss_topic.id
+discuss_list.id
 	"""
 	id_subscription = Column(VARCHAR(255), index = True)
 	"""
-discuss_topic.id_subscription
+discuss_list.id_subscription
+	"""
+	hybrid_list = Column(BOOLEAN, server_default = "0", nullable = False)
+	"""
+discuss_list.hybrid_list
 	"""
 	owner_type = Column(CHAR(1), server_default = "u", nullable = False)
 	"""
-discuss_topic.owner_type
-	"""
-	author_id = Column(VARCHAR(32))
-	"""
-discuss_topic.author_id
-	"""
-	author_ip = Column(VARCHAR(100))
-	"""
-discuss_topic.author_ip
-	"""
-	posts = Column(BIGINT, server_default = "0", nullable = False)
-	"""
-discuss_topic.posts
+discuss_list.owner_type
 	"""
 	description = Column(VARCHAR(255), server_default = "", nullable = False)
 	"""
-discuss_topic.description
+discuss_list.description
 	"""
-	time_published = Column(DateTime, index = True, nullable = False)
+	topics = Column(BIGINT, server_default = "0", nullable = False)
 	"""
-discuss_topic.time_published
+discuss_list.topics
+	"""
+	posts = Column(BIGINT, server_default = "0", nullable = False)
+	"""
+discuss_list.posts
+	"""
+	last_id_topic = Column(VARCHAR(32))
+	"""
+discuss_list.last_id_topic
 	"""
 	last_id_author = Column(VARCHAR(32))
 	"""
-discuss_topic.last_id_author
+discuss_list.last_id_author
 	"""
 	last_preview = Column(VARCHAR(255))
 	"""
-discuss_topic.last_preview
+discuss_list.last_preview
 	"""
 	locked = Column(BOOLEAN, server_default = "0", nullable = False)
 	"""
-discuss_topic.locked
+discuss_list.locked
 	"""
 	guest_permission = Column(CHAR(1), server_default = "", nullable = False)
 	"""
@@ -118,7 +118,7 @@ contentor_category.guest_permission
 contentor_category.user_permission
 	"""
 
-	__mapper_args__ = { "polymorphic_identity": "DiscussTopic" }
+	__mapper_args__ = { "polymorphic_identity": "DiscussList" }
 	"""
 sqlalchemy.org: Other options are passed to mapper() using the
 __mapper_args__ class variable.
@@ -127,12 +127,13 @@ __mapper_args__ class variable.
 	def __init__(self, *args, **kwargs):
 	#
 		"""
-Constructor __init__(DiscussTopic)
+Constructor __init__(DiscussList)
 
 :since: v0.1.00
 		"""
 
 		DataLinker.__init__(self, *args, **kwargs)
+		if (self.topics is None): self.topics = 0
 		if (self.posts is None): self.posts = 0
 	#
 #

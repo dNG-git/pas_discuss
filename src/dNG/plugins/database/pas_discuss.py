@@ -33,9 +33,9 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 # pylint: disable=unused-argument
 
-from dNG.pas.database.schema import Schema
-from dNG.pas.module.named_loader import NamedLoader
-from dNG.pas.plugins.hook import Hook
+from dNG.database.schema import Schema
+from dNG.module.named_loader import NamedLoader
+from dNG.plugins.hook import Hook
 
 def after_apply_schema(params, last_return = None):
 #
@@ -49,13 +49,13 @@ Called for "dNG.pas.Database.applySchema.after"
 :since:  v0.1.00
 	"""
 
-	list_class = NamedLoader.get_class("dNG.pas.database.instances.DiscussList")
+	list_class = NamedLoader.get_class("dNG.database.instances.DiscussList")
 	Schema.apply_version(list_class)
 
-	topic_class = NamedLoader.get_class("dNG.pas.database.instances.DiscussTopic")
+	topic_class = NamedLoader.get_class("dNG.database.instances.DiscussTopic")
 	Schema.apply_version(topic_class)
 
-	post_class = NamedLoader.get_class("dNG.pas.database.instances.DiscussPost")
+	post_class = NamedLoader.get_class("dNG.database.instances.DiscussPost")
 	Schema.apply_version(post_class)
 
 	return last_return
@@ -73,9 +73,9 @@ Load and register all SQLAlchemy objects to generate database tables.
 :since:  v0.1.00
 	"""
 
-	NamedLoader.get_class("dNG.pas.database.instances.DiscussList")
-	NamedLoader.get_class("dNG.pas.database.instances.DiscussTopic")
-	NamedLoader.get_class("dNG.pas.database.instances.DiscussPost")
+	NamedLoader.get_class("dNG.database.instances.DiscussList")
+	NamedLoader.get_class("dNG.database.instances.DiscussTopic")
+	NamedLoader.get_class("dNG.database.instances.DiscussPost")
 
 	return last_return
 #

@@ -33,15 +33,16 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 from time import time
 
-from dNG.pas.data.binary import Binary
-from dNG.pas.data.data_linker import DataLinker
-from dNG.pas.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
-from dNG.pas.data.subscribable_mixin import SubscribableMixin
-from dNG.pas.database.lockable_mixin import LockableMixin
-from dNG.pas.database.sort_definition import SortDefinition
-from dNG.pas.database.instances.data_linker import DataLinker as _DbDataLinker
-from dNG.pas.database.instances.discuss_post import DiscussPost as _DbDiscussPost
-from dNG.pas.database.instances.discuss_topic import DiscussTopic as _DbDiscussTopic
+from dNG.data.binary import Binary
+from dNG.data.data_linker import DataLinker
+from dNG.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
+from dNG.data.subscribable_mixin import SubscribableMixin
+from dNG.database.instances.data_linker import DataLinker as _DbDataLinker
+from dNG.database.instances.discuss_post import DiscussPost as _DbDiscussPost
+from dNG.database.instances.discuss_topic import DiscussTopic as _DbDiscussTopic
+from dNG.database.lockable_mixin import LockableMixin
+from dNG.database.sort_definition import SortDefinition
+
 from .list import List
 
 class Topic(DataLinker, LockableMixin, OwnableLockableWriteMixin, SubscribableMixin):
@@ -49,7 +50,7 @@ class Topic(DataLinker, LockableMixin, OwnableLockableWriteMixin, SubscribableMi
 	"""
 "Topic" represents a discussion topic.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: discuss
@@ -264,10 +265,10 @@ Insert the instance into the database.
 :since: v0.1.00
 		"""
 
-		DataLinker._insert(self)
-
 		with self.local.connection.no_autoflush:
 		#
+			DataLinker._insert(self)
+
 			if (self.local.db_instance.time_published is None): self.local.db_instance.time_published = int(time())
 
 			data_missing = self.is_data_attribute_none("owner_type", "guest_permission", "user_permission")

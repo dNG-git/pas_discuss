@@ -33,25 +33,25 @@ https://www.direct-netware.de/redirect?licenses;gpl
 
 from time import time
 
-from dNG.pas.data.binary import Binary
-from dNG.pas.data.data_linker import DataLinker
-from dNG.pas.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
-from dNG.pas.data.ownable_mixin import OwnableMixin as OwnableInstance
-from dNG.pas.data.subscribable_mixin import SubscribableMixin
-from dNG.pas.database.condition_definition import ConditionDefinition
-from dNG.pas.database.connection import Connection
-from dNG.pas.database.lockable_mixin import LockableMixin
-from dNG.pas.database.nothing_matched_exception import NothingMatchedException
-from dNG.pas.database.instances.data_linker import DataLinker as _DbDataLinker
-from dNG.pas.database.instances.discuss_list import DiscussList as _DbDiscussList
-from dNG.pas.database.instances.discuss_topic import DiscussTopic as _DbDiscussTopic
+from dNG.data.binary import Binary
+from dNG.data.data_linker import DataLinker
+from dNG.data.ownable_mixin import OwnableMixin as OwnableInstance
+from dNG.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
+from dNG.data.subscribable_mixin import SubscribableMixin
+from dNG.database.condition_definition import ConditionDefinition
+from dNG.database.connection import Connection
+from dNG.database.instances.data_linker import DataLinker as _DbDataLinker
+from dNG.database.instances.discuss_list import DiscussList as _DbDiscussList
+from dNG.database.instances.discuss_topic import DiscussTopic as _DbDiscussTopic
+from dNG.database.lockable_mixin import LockableMixin
+from dNG.database.nothing_matched_exception import NothingMatchedException
 
 class List(DataLinker, LockableMixin, OwnableLockableWriteMixin, SubscribableMixin):
 #
 	"""
 "List" represents a discussion list.
 
-:author:     direct Netware Group
+:author:     direct Netware Group et al.
 :copyright:  direct Netware Group - All rights reserved
 :package:    pas
 :subpackage: discuss
