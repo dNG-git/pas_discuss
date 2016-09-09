@@ -36,6 +36,7 @@ from time import time
 from dNG.data.binary import Binary
 from dNG.data.data_linker import DataLinker
 from dNG.data.ownable_lockable_write_mixin import OwnableLockableWriteMixin
+from dNG.data.ownable_mixin import OwnableMixin as OwnableInstance
 from dNG.data.subscribable_mixin import SubscribableMixin
 from dNG.database.instances.data_linker import DataLinker as _DbDataLinker
 from dNG.database.instances.discuss_post import DiscussPost as _DbDiscussPost
@@ -271,11 +272,13 @@ Insert the instance into the database.
 
 			if (self.local.db_instance.time_published is None): self.local.db_instance.time_published = int(time())
 
-			data_missing = self.is_data_attribute_none("owner_type", "guest_permission", "user_permission")
-			acl_missing = (len(self.local.db_instance.rel_acl) == 0)
-			parent_object = (self.load_parent() if (data_missing or acl_missing) else None)
+			is_acl_missing = (len(self.local.db_instance.rel_acl) == 0)
+			is_data_missing = self.is_data_attribute_none("owner_type", "guest_permission", "user_permission")
+			is_permission_missing = self.is_data_attribute_none("guest_permission", "user_permission")
 
-			if (data_missing and (isinstance(parent_object, List) or isinstance(parent_object, List))):
+			parent_object = (self.load_parent() if (is_acl_missing or is_data_missing or is_permission_missing) else None)
+
+			if (is_data_missing and isinstance(parent_object, List)):
 			#
 				parent_data = parent_object.get_data_attributes("id_site", "owner_type", "guest_permission", "user_permission")
 
@@ -285,7 +288,11 @@ Insert the instance into the database.
 				if (self.local.db_instance.user_permission is None): self.local.db_instance.user_permission = parent_data['user_permission']
 			#
 
-			# TODO: if (acl_missing and isinstance(parent_object, OwnableLockableWriteMixin)): self.data.acl_set_list(parent_object.data_acl_get_list())
+			if (isinstance(parent_object, OwnableInstance)):
+			#
+				if (is_acl_missing): self._copy_acl_entries_from_instance(parent_object)
+				if (is_permission_missing): self._copy_default_permission_settings_from_instance(parent_object)
+			#
 		#
 	#
 
